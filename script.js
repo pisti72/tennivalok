@@ -1,18 +1,33 @@
-function send(){
-    var cimkek = document.querySelector("#cimkek");
-    var szoveg = document.querySelector("#tennivalo");
+var cimkek_png = [
+    'sarga',
+    'zold',
+    'lila',
+    'kek'];
 
-    fetch('https://localhost/tennivalok/api.php?insert='+szoveg.value)
-    .then(response => response.json())
-    .then(data => {
-        renderData(data,cimkek);
-    });
+function send(event){
+    if(event.keyCode == 13){
+        var cimkek = document.querySelector("#cimkek");
+        var szoveg = document.querySelector("#tennivalo");
+        var szin = 0;
 
-    szoveg.value = "";
+        for(var i=0; i<szoveg.value.length; i++){
+            szin += szoveg.value.charCodeAt(i);
+        }
+
+        szin = szin % cimkek_png.length;
+
+        fetch('api.php?action=insert&szoveg='+szoveg.value+'&szin='+szin)
+        .then(response => response.json())
+        .then(data => {
+            renderData(data,cimkek);
+        });
+
+        szoveg.value = "";
+    }
 }
 
 function remove(id){
-    fetch('https://localhost/tennivalok/api.php?remove='+id)
+    fetch('api.php?action=remove&id='+id)
     .then(response => response.json())
     .then(data => {
         renderData(data,cimkek);
@@ -26,7 +41,7 @@ function getAll(){
      * https://developer.mozilla.org/en-US/docs/Web/API/Response/json
      */
 
-    fetch('https://localhost/tennivalok/api.php?action=getall')
+    fetch('api.php?action=getall')
     .then(response => response.json())
     .then(data => {
         renderData(data,cimkek);
@@ -35,8 +50,9 @@ function getAll(){
 
 function renderData(data,cimkek){
     var tartalom = "";
-    for(var i=0; i<data.lista.length;i++){
-        tartalom += "<div class=\"cimke\">";
+    for(var i=0; i<data.lista.length; i++){
+        szin = cimkek_png[data.lista[i].szin];
+        tartalom += "<div class=\"cimke " + szin + "\">";
         tartalom += "<div class=\"kuka\" onclick=\"remove("+data.lista[i].id+")\"></div>";
         tartalom += data.lista[i].szoveg;
         tartalom += "</div>";  
